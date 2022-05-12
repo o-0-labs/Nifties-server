@@ -1,0 +1,44 @@
+[package]
+name = "nifties"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dotenv = "0.15.0"
+env_logger = "0.9.0"
+glob = "0.3.0"
+indicatif = { version = "0.16.2", features = ["rayon"] }
+lazy_static = "1.4.0"
+log = "0.4.14"
+log4rs = "1.1.1"
+
+rayon = "1.5.1"
+reqwest = {version = "0.11.5" ,features = ["json"]}
+retry = "1.3.0"
+serde = "1.0.130"
+serde_json = "1.0.68"
+
+rocket = {version = "0.5.0-rc.1" ,features=["json"]}
+chrono = "0.4"
+# bson (required)
+# serde = { version = "1", features = ["derive"] }
+rbson = "2.0"
+
+# logging lib(required)
+# log = "0.4"
+# fast_log="1.3"
+
+# rbatis (required) default is all-database+runtime-async-std-rustls
+rbatis =  { version = "3.0" } 
+redis = { version = "0.21.5", features = ["r2d2"] }
+r2d2 = { version="0.8.9" }
+r2d2_redis = "0.13.0"
+tweetnacl-rs = "0.1.3"
+ring = "0.16.20"
+jsonwebtoken = "8.1.0"
+# kafka = "0.8.0"
+# log = "0.4.16"
+async-std = { version = "1.2.0", features = ["attributes","tokio1"] }
+regex = "1.5.5"
