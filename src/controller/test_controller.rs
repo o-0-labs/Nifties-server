@@ -58,7 +58,7 @@ pub async fn update(article: Json<Article>,rb: &State<Arc<Rbatis>>) -> JSONRespo
 pub async fn delete(article: Json<Article>,rb: &State<Arc<Rbatis>>) -> JSONResponseWithoutData{
     println!("{}",format!("{:?}", article));
 
-    if article.id == None {
+    if let None = article.id  {
         return JSONResponseWithoutData::err(1)
     }
 

@@ -1,4 +1,5 @@
-use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::Header};
+use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::Header, response::content};
+
 
 //解决跨域
 pub struct CORS;
@@ -31,5 +32,14 @@ impl Fairing for CORS {
 #[catch(401)]
 pub fn unvalid_token( ) -> String {
 //     ApiResponse::custom_error(MESSAGE_4000.to_string(),4000)
-"hello".to_string()
+"unvalid_token".to_string()
 }
+
+#[catch(404)]
+pub fn general_not_found() -> content::RawHtml<&'static str> {
+    content::RawHtml(r#"
+        <p>Hmm... What are you looking for?</p>
+        Say <a href="/Niftes/index">hello!</a>
+    "#)
+}
+

@@ -15,6 +15,7 @@ pub async fn insert_service(rb: &State<Arc<Rbatis>>,article: &Article) -> Result
         title : article.title.clone(),
         id : None,
     };
+  
 
     py_insert(rb,&article).await
     
