@@ -16,11 +16,10 @@ use std::sync::Arc;
 use rocket::fairing::AdHoc;
 use rbatis::rbatis::Rbatis;
 use rbatis::db::DBPoolOptions;
-use rocket_dyn_templates::Template;
 
 use crate::controller::common_controller::{unvalid_token, general_not_found, CORS};
 use crate::controller::test_controller::{insert, query, update, delete};
-use crate::controller::login_controller::{login, get_token_test};
+use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
 
 //pub const MYSQL_URL: &'static str = "mysql://nft:nft@101.33.60.164:3306/nft";
@@ -44,13 +43,12 @@ async fn main()  {
 
     if let Err(e) = rocket::build()
                     .register("/",catchers![unvalid_token,general_not_found])
-                    .mount("/", routes![query,insert,update,delete,login,get_token_test])
+                    .mount("/", routes![query,insert,update,delete,login,register])
                     //.mount("/session", session_controller::routes())
                     .attach(AdHoc::on_ignite("Rbatis Database", |rocket| async move {
                         rocket.manage(rb)
                     }))
                     .attach(CORS)
-                    .attach(Template::fairing())
                     .launch()
                     .await {
                         println!("Whoops! Rocket didn't launch!");

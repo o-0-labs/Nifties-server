@@ -12,7 +12,11 @@ use crate::constant::KEY;
 pub struct User {
     pub user_id: String,
     pub pub_key: String,
-    
+    pub user_name:Option<String>,
+    pub email:Option<String>,
+    pub token: Option<String>,
+    pub profile_photo: Option<String>,
+    pub create_time: Option<rbatis::DateTimeNative>,
 }
 
 
@@ -27,13 +31,15 @@ pub struct Claims {
 #[serde(crate = "rocket::serde")]
 pub struct UserAuth {
     pub sign_msg: String,
-    pub pub_key: [u8; 32],
-    pub signature: Vec<u8>,
+    pub pub_key: String,
+    pub signature: String,
 
 }
 
 
-pub struct Token;
+pub struct Token{
+    pub sub: String,
+}
 // Bearer Token
 impl Token {
     fn from_request(header: &str) -> Option<Token> {
@@ -59,7 +65,9 @@ impl Token {
                 if now > c.claims.exp{
                     return None;
                 }
-                return Some(Token);
+                return Some(Token{
+                    sub:c.claims.sub
+                });
             }
             Err(_) => None,
         }
