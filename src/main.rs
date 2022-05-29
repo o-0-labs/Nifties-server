@@ -21,6 +21,9 @@ use crate::controller::common_controller::{unvalid_token, general_not_found, COR
 use crate::controller::test_controller::{insert, query, update, delete};
 use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
+use crate::controller::event_controller::{event_query, event_add, event_view, event_like};
+use crate::controller::hackathon_controller::{hackathon_count,hackathon_query,hackathon_join};
+use crate::controller::grants_controller::grants_query;
 
 //pub const MYSQL_URL: &'static str = "mysql://nft:nft@101.33.60.164:3306/nft";
 
@@ -43,7 +46,11 @@ async fn main()  {
 
     if let Err(e) = rocket::build()
                     .register("/",catchers![unvalid_token,general_not_found])
-                    .mount("/", routes![query,insert,update,delete,login,register])
+                    .mount("/", routes![query,insert,update,delete,login,register,
+                    event_query,event_add,event_view,event_like,
+                    hackathon_count,hackathon_query,hackathon_join,
+                    grants_query
+                    ])
                     //.mount("/session", session_controller::routes())
                     .attach(AdHoc::on_ignite("Rbatis Database", |rocket| async move {
                         rocket.manage(rb)

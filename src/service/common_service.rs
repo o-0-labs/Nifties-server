@@ -10,7 +10,7 @@ use crate::constant::KEY;
 use crate::model::common_model::{User, Claims};
 
 pub async fn check_user(rb: &State<Arc<Rbatis>>, pub_key: String) -> Result<User, Error> {
-    //let key_string = format!("{:?}", pub_key);
+    
     let re = query_user(rb, &pub_key).await;
 
     match re {
@@ -38,7 +38,7 @@ pub async fn check_user(rb: &State<Arc<Rbatis>>, pub_key: String) -> Result<User
 }
 
 #[py_sql("select * from user where delete_flag = '0' and pub_key= #{pub_key} ")]
-pub async fn query_user(rb: &State<Arc<Rbatis>>, pub_key: &str) -> Result<Option<User>, Error> {
+pub async fn query_user(rb: &State<Arc<Rbatis>>, pub_key: &str) -> Option<User> {
     todo!()
 }
 

@@ -87,3 +87,11 @@ impl<'r> FromRequest<'r> for Token {
         Outcome::Failure((Status::Unauthorized, ()))
     }
 }
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct PageParams{
+    pub page_no: u64,
+    pub page_size: u64,
+    pub status: Option<String>,
+}

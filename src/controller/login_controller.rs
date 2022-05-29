@@ -1,4 +1,3 @@
-
 use rbatis::rbatis::Rbatis;
 use rocket::serde::json::Json;
 use rocket::State;
@@ -60,7 +59,7 @@ pub async fn register(_auth: Token, user: Json<User>, rb: &State<Arc<Rbatis>>) -
     if !sub.eq(&_auth.sub){
         let msg = "token Error!";
         error!("register return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(99,json!({"msg": format!("{}", msg) }))
     }
 
     if util::is_empty(&u.user_name){
