@@ -11,7 +11,6 @@ pub struct HackathonCount {
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct Hackathon {
-    pub user_id: Option<String>,
     pub hackathon_id:Option<String>,
     pub title:Option<String>,
     pub date:Option<String>,

@@ -23,9 +23,8 @@ use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
 use crate::controller::event_controller::{event_query, event_add, event_view, event_like};
 use crate::controller::hackathon_controller::{hackathon_count,hackathon_query,hackathon_join};
-use crate::controller::grants_controller::grants_query;
+use crate::controller::grants_controller::{grants_query,grants_add};
 
-//pub const MYSQL_URL: &'static str = "mysql://nft:nft@101.33.60.164:3306/nft";
 
 #[rocket::main]
 async fn main()  {
@@ -49,7 +48,7 @@ async fn main()  {
                     .mount("/", routes![query,insert,update,delete,login,register,
                     event_query,event_add,event_view,event_like,
                     hackathon_count,hackathon_query,hackathon_join,
-                    grants_query
+                    grants_query,grants_add
                     ])
                     //.mount("/session", session_controller::routes())
                     .attach(AdHoc::on_ignite("Rbatis Database", |rocket| async move {

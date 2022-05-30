@@ -51,6 +51,7 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
 
     let mut hackathon = hackathon.into_inner();
 
+
     match &hackathon.user_id {
         Some(s) => {
             if s.trim().len() == 0 {
@@ -71,6 +72,29 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
             return JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
         },
     }
+
+    if let Some(user_id) = &hackathon.user_id {
+        match &hackathon.hackathon_id {
+            Some(hackathon_id) => {
+                if hackathon_id.trim().len() == 0 {
+                    let msg = "missing hackathon_id!";
+                    error!("hackathon/join return err, {}",msg);
+                    return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+                }
+                
+                if let Err(e) = hackathon_service::hackathon_join_check(rb, hackathon_id, user_id).await{
+                    error!("hackathon/join return err, {}",e);
+                    return JSONResponse::err(4,json!({"msg": format!("{}", e) }))
+                }
+            },
+            None => {
+                let msg = "missing hackathon_id!";
+                error!("hackathon/join return err, {}",msg);
+                return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+            },
+        }
+    }
+    
 
     if util::is_empty(&hackathon.discord){
         let msg = "missing discord!";

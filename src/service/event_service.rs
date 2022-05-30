@@ -41,14 +41,8 @@ values
 ")]
 pub async fn event_insert(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),Error>{  todo!() }
 
-#[py_sql("update event set
-event_view = event_view + 1 
-where event_id = #{event.event_id}
-")]
+#[py_sql("update event a set a.page_view = a.page_view + 1 where a.event_id = #{event.event_id}")]
 async fn event_view_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),Error>{  todo!() }
 
-#[py_sql("update event set
-event_like = event_like + 1 
-where event_id = #{event.event_id}
-")]
+#[py_sql("update event a set a.like = a.like + 1 where a.event_id = #{event.event_id} ")]
 async fn event_like_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),Error>{  todo!() }
