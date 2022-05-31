@@ -14,7 +14,7 @@ pub async fn hackathon_query(rb: &State<Arc<Rbatis>>, params: PageParams) -> Res
     query_hackathon(rb,page_req,&params).await
 }
 
-pub async fn hackathon_join_check<'a>(rb: &State<Arc<Rbatis>>,hackathon_id: &'a str, user_id: &'a str) -> Result<(),&'a str>{
+pub async fn hackathon_join_check<'a,'b>(rb: &'a State<Arc<Rbatis>>,hackathon_id: &'b str, user_id: &'b str) -> Result<(),&'b str>{
     
     match query_hackathon_by_id(rb,hackathon_id).await {
         Ok(h) => match h {

@@ -1,4 +1,12 @@
-use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::Header, response::content};
+use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::{Header, ContentType}, fs::{NamedFile, relative, TempFile}, response::content, form::Form};
+use serde_json::{json, Value};
+use std::path::{PathBuf, Path};
+use uuid::Uuid;
+use rocket_json_response::JSONResponse;
+
+use crate::constant::MAIN_URL;
+
+
 
 
 //解决跨域
@@ -21,12 +29,6 @@ impl Fairing for CORS {
     }
 }
 
-// #[get("/hello")]
-// async fn hello() -> String {
-// //     ApiResponse::custom_error(MESSAGE_4000.to_string(),4000)
-// "hello".to_string()
-// }
-
 
  
 #[catch(401)]
@@ -41,5 +43,77 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
         <p>Hmm... What are you looking for?</p>
         Say <a href="/Niftes/index">hello!</a>
     "#)
+}
+
+#[get("/img/<path..>")]
+pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
+    let path = Path::new(relative!("img")).join(path);
+    if path.is_dir() {
+        info!("{:?} path.is_dir",path);
+        return None
+    }
+    NamedFile::open(path).await.ok()
+}
+
+
+
+
+#[derive(FromForm)]
+pub struct Upload<'f> {
+    pub upload: TempFile<'f>
+}
+
+#[post("/img/upload", data = "<form>")]
+pub async fn upload(mut form: Form<Upload<'_>>) -> JSONResponse<'static, Value> {
+
+    info!("temp file path: {:#?}",form.upload);
+
+    let suffix = check_content_type(form.upload.content_type());
+
+    if let None = suffix {
+        let msg = "Fail!";
+        JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+    }else if let Some(s) = suffix {
+        let mut file_name = String::from("img/");
+        file_name.push_str(&Uuid::new_v4().to_string().replace("-", ""));
+        file_name.push_str(&s);
+        
+        let save_path = Path::new(&file_name);
+        match form.upload.persist_to(save_path).await{
+            Ok(_) => {
+
+                JSONResponse::ok(json!({"url": format!("{}{}", MAIN_URL, file_name) }))
+            },
+            Err(_) => {
+            let msg = "Fail!";
+            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            },
+        }
+    }else{
+        let msg = "Fail!";
+        JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+    }
+   
+}
+
+fn check_content_type(content: Option<&ContentType>)->Option<String>{
+
+    if let Some(s) = content {
+        if s.is_jpeg() {
+            return Some(".jpg".to_string())
+        }else if s.is_bmp(){
+            return Some(".bmp".to_string())
+        }else if s.is_svg(){
+            return Some(".svg".to_string())
+        }else if s.is_png(){
+            return Some(".png".to_string())
+        }else if s.is_gif(){
+            return Some(".gif".to_string())
+        }else{
+            return None
+        }
+    }
+    None
+
 }
 
