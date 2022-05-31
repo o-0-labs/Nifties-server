@@ -1,22 +1,15 @@
 [debug]
 address = "127.0.0.1"
-port = 8000
+port = 8888
 workers = 16
 keep_alive = 5
 log = "normal"
 limits = { forms = 32768 }
 temp_dir = "D:\\workspace\\rust\\Nifties-server\\temp"
  
-[staging]
-address = "0.0.0.0"
-port = 8000
-workers = 128
-keep_alive = 5
-log = "normal"
-limits = { forms = 32768 }
-temp_dir = "/temp"
+
  
-[production]
+[release]
 address = "0.0.0.0"
 port = 80
 workers = 128
