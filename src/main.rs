@@ -50,7 +50,7 @@ async fn main()  {
                     hackathon_count,hackathon_query,hackathon_join,
                     grants_query,grants_add
                     ])
-                    .mount("/", FileServer::from(relative!("img")))
+                    .mount("/", FileServer::from("img"))
                     .attach(AdHoc::on_ignite("Rbatis Database", |rocket| async move {
                         rocket.manage(rb)
                     }))

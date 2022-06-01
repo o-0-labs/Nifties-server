@@ -47,7 +47,7 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
 
 #[get("/img/<path..>")]
 pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
-    let path = Path::new(relative!("img")).join(path);
+    let path = Path::new("img").join(path);
     if path.is_dir() {
         info!("{:?} path.is_dir",path);
         return None
