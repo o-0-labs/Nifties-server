@@ -4,7 +4,7 @@ use std::path::{PathBuf, Path};
 use uuid::Uuid;
 use rocket_json_response::JSONResponse;
 
-use crate::constant::MAIN_URL;
+use crate::{constant::MAIN_URL, model::common_model::Token};
 
 
 
@@ -65,7 +65,7 @@ pub struct Upload<'f> {
 }
 
 #[post("/img/upload", data = "<form>")]
-pub async fn upload(mut form: Form<Upload<'_>>) -> JSONResponse<'static, Value> {
+pub async fn upload(_auth: Token, mut form: Form<Upload<'_>>) -> JSONResponse<'static, Value> {
 
     info!("temp file path: {:#?}",form.upload);
 
