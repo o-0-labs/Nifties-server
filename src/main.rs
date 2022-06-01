@@ -13,7 +13,7 @@ mod utils;
 
 use std::sync::Arc;
 
-use rocket::{fairing::AdHoc, fs::{FileServer, relative}};
+use rocket::{fairing::AdHoc, fs::FileServer};
 use rbatis::rbatis::Rbatis;
 use rbatis::db::DBPoolOptions;
 

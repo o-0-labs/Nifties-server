@@ -1,4 +1,4 @@
-use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::{Header, ContentType}, fs::{NamedFile, relative, TempFile}, response::content, form::Form};
+use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::{Header, ContentType}, fs::{NamedFile, TempFile}, response::content, form::Form};
 use serde_json::{json, Value};
 use std::path::{PathBuf, Path};
 use uuid::Uuid;
