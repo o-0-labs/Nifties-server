@@ -52,6 +52,7 @@ pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
         info!("{:?} path.is_dir",path);
         return None
     }
+    info!("the img path is {:?}",path);
     NamedFile::open(path).await.ok()
 }
 
