@@ -3,9 +3,7 @@ use rocket::serde::json::Json;
 use rocket::State;
 use serde_json::{json, Value};
 use std::sync::Arc;
-use tweetnacl_rs::TweetNacl;
-use tweetnacl_rs::{from_hex};
-use rocket_json_response::{JSONResponse};
+use rocket_json_response::JSONResponse;
 
 
 use crate::model::common_model::{Token, UserAuth, User};
@@ -19,9 +17,9 @@ pub async fn login(rb: &State<Arc<Rbatis>>, user_auth: Json<UserAuth>) -> JSONRe
 
     let user = user_auth.into_inner();
 
-    let pub_key = from_hex(&user.pub_key);
-    if pub_key.verify(user.sign_msg, &from_hex(&user.signature)) {
-        match common_service::check_user(rb, user.pub_key).await {
+    //let pub_key = from_hex(&user.pub_key);
+    if common_service::verify(&user) {
+        match common_service::check_user(rb, user.call_name).await {
             Ok(u) => match common_service::get_token(u).await {
                 Ok(u) => {
                     info!("login return ok, {:?}",u);
@@ -54,7 +52,7 @@ pub async fn register(_auth: Token, user: Json<User>, rb: &State<Arc<Rbatis>>) -
 
     let mut u = user.into_inner();
 
-    let sub = format!("{}&{}", &u.user_id, &u.pub_key);
+    let sub = format!("{}&{}", &u.user_id, &u.call_name);
     
     if !sub.eq(&_auth.sub){
         let msg = "token Error!";

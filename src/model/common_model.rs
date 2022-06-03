@@ -11,7 +11,7 @@ use crate::constant::KEY;
 #[serde(crate = "rocket::serde")]
 pub struct User {
     pub user_id: String,
-    pub pub_key: String,
+    pub call_name: String,
     pub user_name:Option<String>,
     pub email:Option<String>,
     pub token: Option<String>,
@@ -30,8 +30,8 @@ pub struct Claims {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct UserAuth {
-    pub sign_msg: String,
-    pub pub_key: String,
+    pub call_name: String,
+    pub timestamp: u64,
     pub signature: String,
 
 }

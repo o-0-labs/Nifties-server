@@ -16,7 +16,10 @@ pub struct Hackathon {
     pub date:Option<String>,
     pub description:Option<String>,
     pub sponsored:Option<String>,
-    pub status:Option<String>
+    pub status:Option<String>,
+    pub image:Option<String>,
+    pub discord_url:Option<String>,
+    pub content:Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
