@@ -20,6 +20,7 @@ pub struct Hackathon {
     pub image:Option<String>,
     pub discord_url:Option<String>,
     pub content:Option<String>,
+    pub join_flag:Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]

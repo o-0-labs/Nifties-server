@@ -1,4 +1,3 @@
-#![no_std]
 #![allow(clippy::unreadable_literal)]
 
 use core::default::Default;
@@ -37,14 +36,14 @@ impl Default for Sha256 {
 }
 
 impl Sha256 {
-    pub fn with_state(state: [u32; 8]) -> Self {
-        Self {
-            state,
-            completed_data_blocks: 0,
-            pending: [0u8; 64],
-            num_pending: 0,
-        }
-    }
+    // pub fn with_state(state: [u32; 8]) -> Self {
+    //     Self {
+    //         state,
+    //         completed_data_blocks: 0,
+    //         pending: [0u8; 64],
+    //         num_pending: 0,
+    //     }
+    // }
 
     fn update_state(state: &mut [u32; 8], data: &[u8; 64]) {
         let mut w = [0; 64];
@@ -139,13 +138,13 @@ impl Sha256 {
         unsafe { *(self.state.as_ptr() as *const [u8; 32]) }
     }
 
-    pub fn digest(data: &[u8]) -> [u8; 32] {
-        let mut sha256 = Self::default();
-        sha256.update(data);
-        sha256.finish()
-    }
+    // pub fn digest(data: &[u8]) -> [u8; 32] {
+    //     let mut sha256 = Self::default();
+    //     sha256.update(data);
+    //     sha256.finish()
+    // }
 
-    pub fn state(&self) -> [u32; 8] {
-        self.state
-    }
+    // pub fn state(&self) -> [u32; 8] {
+    //     self.state
+    // }
 }

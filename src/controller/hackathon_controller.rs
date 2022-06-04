@@ -6,7 +6,7 @@ use rocket_json_response::JSONResponse;
 
 use crate::service::hackathon_service;
 use crate::model::common_model::{PageParams, Token};
-use crate::model::hackathon_model::UserHackathon;
+use crate::model::hackathon_model::{UserHackathon, Hackathon};
 use crate::utils::util;
 
 #[post("/hackathon/count")]
@@ -33,6 +33,27 @@ pub async fn hackathon_query(params: Json<PageParams>,rb: &State<Arc<Rbatis>>) -
     let p = params.into_inner();
 
     match hackathon_service::hackathon_query(rb,p).await{
+        Ok(re) => {
+            info!("hackathon/query return ok");
+            JSONResponse::ok(json!(re))
+        },
+        Err(e) => {
+            let msg = "query Fail!";
+            error!("hackathon/query return err, {}",e);
+            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        },
+    }
+}
+
+#[post("/hackathon/querybyuser", format = "json", data = "<params>")]
+pub async fn hackathon_query_by_user(_auth: Token,params: Json<PageParams>,rb: &State<Arc<Rbatis>>) -> JSONResponse<'static, Value> {
+    info!("hackathon/query parameter, {:?}",params);
+
+    let p = params.into_inner();
+
+    let user_id = &_auth.sub[0..32];
+
+    match hackathon_service::hackathon_query_by_user(rb, p,user_id).await {
         Ok(re) => {
             info!("hackathon/query return ok");
             JSONResponse::ok(json!(re))
@@ -142,4 +163,38 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
             JSONResponse::err(10,json!({"msg": format!("{}", e) }))
         },
     }
+}
+
+
+#[post("/hackathon/detail", format = "json", data = "<hackathon>")]
+pub async fn hackathon_detail(hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>) -> JSONResponse<'static, Value> {
+    info!("hackathon/detail parameter, {:?}",hackathon);
+
+    let h = hackathon.into_inner();
+
+    match h.hackathon_id {
+        Some(h) => {
+            if h.trim().len() == 0 {
+                let msg = "missing hackathon_id!";
+                error!("hackathon/detail return err, {}",msg);
+                return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            }else{
+                match hackathon_service::query_detail(rb, &h).await {
+                    Ok(re) => {
+                        info!("hackathon/detail return ok");
+                        JSONResponse::ok(json!(re))
+                    },
+                    Err(e) => {
+                        error!("hackathon/detail return err, {}",e);
+                        JSONResponse::err(1,json!({"msg": format!("{}", e) }))
+                    },
+                }
+            }
+        },
+        None => {
+            let msg = "missing hackathon_id!";
+            error!("hackathon/detail return err, {}",msg);
+            return JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
+        },
+    }    
 }

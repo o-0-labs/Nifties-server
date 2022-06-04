@@ -22,7 +22,7 @@ use crate::controller::test_controller::{insert, query, update, delete};
 use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
 use crate::controller::event_controller::{event_query, event_add, event_view, event_like};
-use crate::controller::hackathon_controller::{hackathon_count,hackathon_query,hackathon_join};
+use crate::controller::hackathon_controller::{hackathon_count,hackathon_query,hackathon_join,hackathon_detail,hackathon_query_by_user};
 use crate::controller::grants_controller::{grants_query,grants_add};
 
 
@@ -41,13 +41,14 @@ async fn main()  {
 
     info!("linking database successful!");
 
+    
   
 
     if let Err(e) = rocket::build()
                     .register("/",catchers![unvalid_token,general_not_found])
                     .mount("/", routes![query,insert,update,delete,static_source,upload,login,register,
                     event_query,event_add,event_view,event_like,
-                    hackathon_count,hackathon_query,hackathon_join,
+                    hackathon_count,hackathon_query,hackathon_join,hackathon_detail,hackathon_query_by_user,
                     grants_query,grants_add
                     ])
                     .mount("/", FileServer::from("img"))
