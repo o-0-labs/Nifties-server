@@ -17,7 +17,7 @@ use rocket::{fairing::AdHoc, fs::FileServer};
 use rbatis::rbatis::Rbatis;
 use rbatis::db::DBPoolOptions;
 
-use crate::controller::common_controller::{unvalid_token, general_not_found, CORS, static_source,upload};
+use crate::controller::common_controller::{unvalid_token, general_not_found, CORS, static_source,upload,twitter_token};
 use crate::controller::test_controller::{insert, query, update, delete};
 use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
@@ -46,7 +46,7 @@ async fn main()  {
 
     if let Err(e) = rocket::build()
                     .register("/",catchers![unvalid_token,general_not_found])
-                    .mount("/", routes![query,insert,update,delete,static_source,upload,login,register,
+                    .mount("/", routes![query,insert,update,delete,static_source,upload,login,register,twitter_token,
                     event_query,event_add,event_view,event_like,
                     hackathon_count,hackathon_query,hackathon_join,hackathon_detail,hackathon_query_by_user,
                     grants_query,grants_add
