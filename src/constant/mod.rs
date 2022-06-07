@@ -4,5 +4,5 @@ pub const MAIN_URL: &'static str = "http://101.33.60.164/";
 //pub const MAIN_URL: &'static str = "http://127.0.0.1:8888/";
 pub const CONSUMER_KEY: &'static str = "2jQ0ahrYN7SJZu8eQZlfbaaIB";
 pub const CONSUMER_SECRET: &'static str = "N93cynzXCBU4xkUk0hc92Yhp8ajreCqyWdtn2bR295tzdk3YPA";
-pub const OAUTH_CALLBACK: &'static str = "http://101.33.60.164/gettoken";
+pub const OAUTH_CALLBACK: &'static str = "http%3A%2F%2F101.33.60.164%2Fgettoken";
 //pub const REQUEST_TOKEN: &'static str = "https://api.twitter.com/oauth/request_token";
