@@ -1,4 +1,3 @@
-
 use rocket::response::content;
 
 use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK};
@@ -85,9 +84,10 @@ pub async fn get_authorize_url() -> String{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
-    let request_token = egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK)
-    .await
-    .unwrap();
-
-    format!("{:?}",request_token)
+    match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
+        Ok(t) => format!("{:?}",t),
+        Err(e) => {
+            format!("{:?}",e)
+        },
+    }
 }
