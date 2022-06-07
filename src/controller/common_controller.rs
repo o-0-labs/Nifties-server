@@ -45,13 +45,6 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
     "#)
 }
 
-#[get("/gettoken")]
-pub fn twitter_token() -> content::RawHtml<&'static str> {
-    content::RawHtml(r#"
-        <p>Hmm... get token</p>
-    "#)
-}
-
 #[get("/img/<path..>")]
 pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
     let path = Path::new("img").join(path);
@@ -62,9 +55,6 @@ pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
     info!("the img path is {:?}",path);
     NamedFile::open(path).await.ok()
 }
-
-
-
 
 #[derive(FromForm)]
 pub struct Upload<'f> {
