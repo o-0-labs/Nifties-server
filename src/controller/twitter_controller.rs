@@ -2,7 +2,7 @@
 use rocket::response::{content, Redirect};
 use twapi_reqwest::oauth;
 
-use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, REQUEST_TOKEN};
+use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK};
 
 
 #[get("/gettoken")]
