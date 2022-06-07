@@ -1,6 +1,5 @@
 
-use rocket::response::{content, Redirect};
-use twapi_reqwest::oauth;
+use rocket::response::content;
 
 use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK};
 
@@ -61,22 +60,34 @@ pub async fn twitter_token() -> content::RawHtml<&'static str> {
 //     param
 // }
 
+//twapi-reqwest
+//#[get("/authorize_url")]
+// pub async fn get_authorize_url() -> Result<Redirect,String>{
+//     let x_auth_access_type = "write";
+
+//     let res = oauth::request_token(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, Some(x_auth_access_type)).await;
+
+//     match res {
+//         Ok(map) => {
+//             println!("{:?}",map);
+//             Ok(Redirect::to("https://api.twitter.com/oauth/authorize"))
+//         },
+//         Err(e) => {
+//             println!("{}",e);
+//             Err("111".to_string())
+//         },
+//     }
+
+// }
 
 #[get("/authorize_url")]
-pub async fn get_authorize_url() -> Result<Redirect,String>{
-    let x_auth_access_type = "write";
+pub async fn get_authorize_url() -> String{
 
-    let res = oauth::request_token(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, Some(x_auth_access_type)).await;
+    let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
-    match res {
-        Ok(map) => {
-            println!("{:?}",map);
-            Ok(Redirect::to("https://api.twitter.com/oauth/authorize"))
-        },
-        Err(e) => {
-            println!("{}",e);
-            Err("111".to_string())
-        },
-    }
+    let request_token = egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK)
+    .await
+    .unwrap();
 
+    format!("{:?}",request_token)
 }
