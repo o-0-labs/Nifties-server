@@ -1,6 +1,6 @@
 [debug]
-address = "127.0.0.1"
-port = 8888
+address = "0.0.0.0"
+port = 80
 workers = 16
 keep_alive = 5
 log = "normal"
