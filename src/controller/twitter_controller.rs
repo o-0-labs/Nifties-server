@@ -1,4 +1,4 @@
-use rocket::response::content;
+use rocket::response::{content, Redirect};
 
 use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK};
 
@@ -80,14 +80,17 @@ pub async fn twitter_token() -> content::RawHtml<&'static str> {
 // }
 
 #[get("/authorize_url")]
-pub async fn get_authorize_url() -> String{
+pub async fn get_authorize_url() -> Result<Redirect,String>{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
     match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
-        Ok(t) => format!("{:?}",t),
+        Ok(t) =>{
+            info!("step 1 request_token, oauth_token: {:?}",t);
+            Ok(Redirect::to(format!("https://api.twitter.com/oauth/authorize?oauth_token={}",t.key)))
+        },
         Err(e) => {
-            format!("{:?}",e)
+            Err(format!("{:?}",e))
         },
     }
 }
