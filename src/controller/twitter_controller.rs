@@ -70,7 +70,7 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
 
                     let mut access_token: Option<String> = None;
                     let mut access_token_secret: Option<String> = None;
-                    let mut twitter_user_id: Option<u64> = None;
+                    let mut twitter_user_id: Option<String> = None;
                     let mut screen_name: Option<String> = None;
 
                     for elem in t.split('&') {
@@ -78,7 +78,8 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
                         match kv.next() {
                             Some("oauth_token") => access_token = kv.next().map(|s| s.to_string()),
                             Some("oauth_token_secret") => access_token_secret = kv.next().map(|s| s.to_string()),
-                            Some("user_id") => twitter_user_id = kv.next().and_then(|s| s.parse::<u64>().ok()),
+                            //Some("user_id") => twitter_user_id = kv.next().and_then(|s| s.parse::<u64>().ok()),
+                            Some("user_id") => twitter_user_id = kv.next().map(|s| s.to_string()),
                             Some("screen_name") => screen_name = kv.next().map(|s| s.to_string()),
                             Some(_) => (),
                             None => {
