@@ -55,8 +55,17 @@ pub async fn get_access_token(_auth: Token,oauth: Json<Oauth>) -> JSONResponse<'
 
     match res {
         Ok(r) => {
-            println!("{:?}",r);
-            JSONResponse::ok(json!({"msg": format!("{:?}", r)}))
+            let text = r.text().await;
+            match text {
+                Ok(t) => {
+                    println!("{:?}",t);
+                    JSONResponse::ok(json!({"msg": format!("{:?}", t)}))
+                },
+                Err(e) => {
+                    println!("{}",e);
+                    JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+                },
+            }
         },
         Err(e) => {
             println!("{}",e);
