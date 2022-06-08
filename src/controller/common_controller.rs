@@ -45,6 +45,12 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
     "#)
 }
 
+#[get("/error")]
+pub async fn error() -> String {
+//     ApiResponse::custom_error(MESSAGE_4000.to_string(),4000)
+"error!".to_string()
+}
+
 #[get("/img/<path..>")]
 pub async fn static_source(path: PathBuf) -> Option<NamedFile> {
     let path = Path::new("img").join(path);

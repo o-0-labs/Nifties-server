@@ -1,9 +1,12 @@
-use rocket::{response::content, serde::json::Json};
+use std::sync::Arc;
+
+use rbatis::rbatis::Rbatis;
+use rocket::{response::{content, Redirect}, serde::json::Json, State};
 use rocket_json_response::JSONResponse;
 use serde::{Serialize, Deserialize};
 use serde_json::{Value, json};
 
-use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN}, model::common_model::Token};
+use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN, MAIN_URL}, model::{common_model::Token, twitter_model::UserTwitter}, service::twitter_service};
 
 #[derive(FromForm,Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -13,16 +16,16 @@ pub struct Oauth {
 }
 
 
-#[get("/gettoken?<oauth>")]
-pub async fn twitter_token(oauth: Oauth) -> content::RawHtml<&'static str> {
-    println!("{},{}",oauth.oauth_token,oauth.oauth_verifier);
+#[get("/gettoken?<oauth_token>&<oauth_verifier>")]
+pub async fn twitter_token(oauth_token: &str, oauth_verifier: &str) -> content::RawHtml<&'static str> {
+    println!("{},{}",oauth_token,oauth_verifier);
     content::RawHtml(r#"
         <p>Hmm... get token</p>
     "#)
 }
 
 #[get("/authorize_url")]
-pub async fn get_authorize_url(_auth: Token) -> JSONResponse<'static, Value>{
+pub async fn get_authorize_url(_auth: Token) -> Redirect{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
@@ -30,18 +33,23 @@ pub async fn get_authorize_url(_auth: Token) -> JSONResponse<'static, Value>{
         Ok(t) =>{
             info!("step 1 request_token, oauth_token: {:?}",t);
             let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
-            JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
+            //JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
+            Redirect::to(authorize_url)
         },
         Err(e) => {
             error!("get_authorize_url error! {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            //JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            let error_url = format!("{}{}",MAIN_URL,"error");
+            Redirect::to(error_url)
         },
     }
 }
 
 
 #[post("/access_token", format = "json", data = "<oauth>")]
-pub async fn get_access_token(_auth: Token,oauth: Json<Oauth>) -> JSONResponse<'static, Value>{
+pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<Oauth>) -> JSONResponse<'static, Value>{
+
+    let user_id = &_auth.sub[0..32];
 
     let oauth = oauth.into_inner();
     let params = [("oauth_token",&oauth.oauth_token),("oauth_verifier",&oauth.oauth_verifier)];
@@ -59,49 +67,105 @@ pub async fn get_access_token(_auth: Token,oauth: Json<Oauth>) -> JSONResponse<'
             match text {
                 Ok(t) => {
                     println!("{:?}",t);
-                    JSONResponse::ok(json!({"msg": format!("{:?}", t)}))
+
+                    let mut access_token: Option<String> = None;
+                    let mut access_token_secret: Option<String> = None;
+                    let mut twitter_user_id: Option<u64> = None;
+                    let mut screen_name: Option<String> = None;
+
+                    for elem in t.split('&') {
+                        let mut kv = elem.splitn(2, '=');
+                        match kv.next() {
+                            Some("oauth_token") => access_token = kv.next().map(|s| s.to_string()),
+                            Some("oauth_token_secret") => access_token_secret = kv.next().map(|s| s.to_string()),
+                            Some("user_id") => twitter_user_id = kv.next().and_then(|s| s.parse::<u64>().ok()),
+                            Some("screen_name") => screen_name = kv.next().map(|s| s.to_string()),
+                            Some(_) => (),
+                            None => {
+                                // return Err(error::Error::InvalidResponse(
+                                //     "unexpected end of response in access_token",
+                                //     None,
+                                // ))
+                                let msg = "unexpected end of response in access_token";
+                                error!("access_token error,{}",msg);
+                                return JSONResponse::err(4,json!({"msg": format!("{}", msg)}))
+                            }
+                        }
+                    }
+                    let user_twitter = UserTwitter {
+                        user_id:user_id.to_string(),
+                        twitter_user_id,
+                        screen_name,
+                        access_token,
+                        access_token_secret,
+                    };
+
+                    match twitter_service::add_twitter(rb,user_twitter).await {
+                        Ok(ut) => {
+                            info!("step 3 access_token success,{:?}",ut.screen_name);
+                            JSONResponse::ok(json!({"twitter_name": format!("{:?}", ut.screen_name)}))
+                        },
+                        Err(e) => {
+                            error!("access_token error,{}",e);
+                            JSONResponse::err(3,json!({"msg": format!("{}", e)}))
+                        },
+                    }
+
+                    
                 },
                 Err(e) => {
-                    println!("{}",e);
-                    JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+                    error!("access_token error,{}",e);
+                    JSONResponse::err(2,json!({"msg": format!("{}", e)}))
                 },
             }
         },
         Err(e) => {
-            println!("{}",e);
+            error!("access_token error,{}",e);
             JSONResponse::err(1,json!({"msg": format!("{}", e)}))
         }
     }
-
-    // let request = RequestBuilder::new(Method::POST, "https://api.twitter.com/oauth/access_token")
-    //     .oauth_verifier(oauth.oauth_verifier.into())
-    //     .request_token(token)
-        
-
-    // let (_headers, urlencoded) = raw_request(request).await?;
+}
 
 
-    // let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
+#[post("/remove_twitter")]
+pub async fn remove_twitter(rb: &State<Arc<Rbatis>>, _auth: Token) -> JSONResponse<'static, Value>{
 
-    // let request_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
+    let user_id = &_auth.sub[0..32];
 
-    // let oauth = oauth.into_inner();
+    match twitter_service::remove_twitter(rb, user_id).await {
+        Ok(_) => {
+            let msg = "success!";
+            info!("remove_twitter success!");
+            JSONResponse::ok(json!({"msg": format!("{}", msg)}))
+        },
+        Err(e) => {
+            error!("remove_twitter error,{}",e);
+            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+        },
+    }
+}
 
-    // match egg_mode::auth::access_token(con_token, &oauth.oauth_token, oauth.oauth_verifier).await {
-    //     Ok(re) => todo!(),
-    //     Err(_) => todo!(),
-    // }
+#[post("/check_twitter")]
+pub async fn check_twitter(rb: &State<Arc<Rbatis>>, _auth: Token) -> JSONResponse<'static, Value>{
 
+    let user_id = &_auth.sub[0..32];
 
-    // match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
-    //     Ok(t) =>{
-    //         info!("step 1 request_token, oauth_token: {:?}",t);
-    //         let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
-    //         JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
-    //     },
-    //     Err(e) => {
-    //         error!("get_authorize_url error! {}",e);
-    //         JSONResponse::err(1,json!({"msg": format!("{}", e)}))
-    //     },
-    // }
+    match twitter_service::check_twitter(rb, user_id).await {
+        Ok(r) => {
+            match r {
+                Some(ut) => {
+                    info!("check_twitter success, true");
+                    JSONResponse::ok(json!({"twitter_flag": true, "twitter_name": format!("{:?}", ut.screen_name)}))
+                },
+                None => {
+                    info!("check_twitter success, falsse");
+                    JSONResponse::ok(json!({"twitter_flag": format!("{}", false)}))
+                },
+            }
+        },
+        Err(e) => {
+            error!("remove_twitter error,{}",e);
+            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+        },
+    }
 }

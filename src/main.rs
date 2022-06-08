@@ -17,14 +17,14 @@ use rocket::{fairing::AdHoc, fs::FileServer};
 use rbatis::rbatis::Rbatis;
 use rbatis::db::DBPoolOptions;
 
-use crate::controller::common_controller::{unvalid_token, general_not_found, CORS, static_source,upload};
+use crate::controller::common_controller::{unvalid_token, general_not_found, CORS, static_source,upload,error};
 use crate::controller::test_controller::{insert, query, update, delete};
 use crate::controller::login_controller::{login, register};
 use crate::constant::MYSQL_URL;
 use crate::controller::event_controller::{event_query, event_add, event_view, event_like};
 use crate::controller::hackathon_controller::{hackathon_count,hackathon_query,hackathon_join,hackathon_detail,hackathon_query_by_user};
 use crate::controller::grants_controller::{grants_query,grants_add};
-use crate::controller::twitter_controller::{twitter_token, get_authorize_url, get_access_token};
+use crate::controller::twitter_controller::{twitter_token, get_authorize_url, get_access_token, check_twitter, remove_twitter};
 
 
 #[rocket::main]
@@ -47,8 +47,8 @@ async fn main()  {
 
     if let Err(e) = rocket::build()
                     .register("/",catchers![unvalid_token,general_not_found])
-                    .mount("/", routes![query,insert,update,delete,static_source,upload,login,register,
-                    twitter_token,get_authorize_url,get_access_token,
+                    .mount("/", routes![query,insert,update,delete,static_source,upload,login,register,error,
+                    twitter_token,get_authorize_url,get_access_token,check_twitter,remove_twitter,
                     event_query,event_add,event_view,event_like,
                     hackathon_count,hackathon_query,hackathon_join,hackathon_detail,hackathon_query_by_user,
                     grants_query,grants_add
