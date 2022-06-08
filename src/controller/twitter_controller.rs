@@ -1,96 +1,98 @@
-use rocket::response::{content, Redirect};
+use rocket::{response::content, serde::json::Json};
+use rocket_json_response::JSONResponse;
+use serde::{Serialize, Deserialize};
+use serde_json::{Value, json};
 
-use crate::constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK};
+use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN}, model::common_model::Token};
+
+#[derive(FromForm,Serialize, Deserialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct Oauth {
+    oauth_token: String,
+    oauth_verifier: String,
+}
 
 
-#[get("/gettoken")]
-pub async fn twitter_token() -> content::RawHtml<&'static str> {
+#[get("/gettoken?<oauth>")]
+pub async fn twitter_token(oauth: Oauth) -> content::RawHtml<&'static str> {
+    println!("{},{}",oauth.oauth_token,oauth.oauth_verifier);
     content::RawHtml(r#"
         <p>Hmm... get token</p>
     "#)
 }
-//_auth: Token
-// #[get("/authorize_url")]
-// pub async fn get_authorize_url() -> Result<Redirect,String>{
-
-//     let consumer = oauth_client::Token::new(CONSUMER_KEY,CONSUMER_SECRET);
-//     let mut param = HashMap::new();
-//     param.insert("oauth_callback".into(), OAUTH_CALLBACK.into());
-
-//     let bytes = oauth_client::get(REQUEST_TOKEN, &consumer, None, Some(&param));
-
-//     if let Ok(bytes) = bytes {
-//         let resp = std::str::from_utf8(&bytes);
-//         println!("1111111111");
-//         if let Ok(resp) = resp{
-//             println!("3333333");
-//             let param = split_query(&resp);
-//             println!("555555555");
-//             let token = oauth_client::Token::new(
-//                 param.get("oauth_token").unwrap().to_string(),
-//                 param.get("oauth_token_secret").unwrap().to_string(),
-//             );
-
-//             //let re = twitter_api::get_request_token(&consumer);
-
-//             let url = twitter_api::get_authorize_url(&token);
-//             Ok(Redirect::to(url))
-            
-//         }else{
-//             println!("44444444");
-//             Err("get resp error".to_string())
-//         }
-
-//     }else{
-//         println!("2222222222");
-//         Err("get token error".to_string())
-//     }
-
-// }
-
-// fn split_query(query: &str) -> HashMap<Cow<'_, str>, Cow<'_, str>> {
-//     let mut param = HashMap::new();
-//     for q in query.split('&') {
-//         let mut s = q.splitn(2, '=');
-//         let k = s.next().unwrap();
-//         let v = s.next().unwrap();
-//         let _ = param.insert(k.into(), v.into());
-//     }
-//     param
-// }
-
-//twapi-reqwest
-//#[get("/authorize_url")]
-// pub async fn get_authorize_url() -> Result<Redirect,String>{
-//     let x_auth_access_type = "write";
-
-//     let res = oauth::request_token(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, Some(x_auth_access_type)).await;
-
-//     match res {
-//         Ok(map) => {
-//             println!("{:?}",map);
-//             Ok(Redirect::to("https://api.twitter.com/oauth/authorize"))
-//         },
-//         Err(e) => {
-//             println!("{}",e);
-//             Err("111".to_string())
-//         },
-//     }
-
-// }
 
 #[get("/authorize_url")]
-pub async fn get_authorize_url() -> Result<Redirect,String>{
+pub async fn get_authorize_url(_auth: Token) -> JSONResponse<'static, Value>{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
     match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
         Ok(t) =>{
             info!("step 1 request_token, oauth_token: {:?}",t);
-            Ok(Redirect::to(format!("https://api.twitter.com/oauth/authorize?oauth_token={}",t.key)))
+            let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
+            JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
         },
         Err(e) => {
-            Err(format!("{:?}",e))
+            error!("get_authorize_url error! {}",e);
+            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
         },
     }
+}
+
+
+#[post("/access_token", format = "json", data = "<oauth>")]
+pub async fn get_access_token(_auth: Token,oauth: Json<Oauth>) -> JSONResponse<'static, Value>{
+
+    let oauth = oauth.into_inner();
+    let params = [("oauth_token",&oauth.oauth_token),("oauth_verifier",&oauth.oauth_verifier)];
+
+    let client = reqwest::Client::new();
+
+    let res = client.post(ACCESS_TOKEN)
+    .form(&params)
+    .send()
+    .await;
+
+    match res {
+        Ok(r) => {
+            println!("{:?}",r);
+            JSONResponse::ok(json!({"msg": format!("{:?}", r)}))
+        },
+        Err(e) => {
+            println!("{}",e);
+            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+        }
+    }
+
+    // let request = RequestBuilder::new(Method::POST, "https://api.twitter.com/oauth/access_token")
+    //     .oauth_verifier(oauth.oauth_verifier.into())
+    //     .request_token(token)
+        
+
+    // let (_headers, urlencoded) = raw_request(request).await?;
+
+
+    // let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
+
+    // let request_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
+
+    // let oauth = oauth.into_inner();
+
+    // match egg_mode::auth::access_token(con_token, &oauth.oauth_token, oauth.oauth_verifier).await {
+    //     Ok(re) => todo!(),
+    //     Err(_) => todo!(),
+    // }
+
+
+    // match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
+    //     Ok(t) =>{
+    //         info!("step 1 request_token, oauth_token: {:?}",t);
+    //         let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
+    //         JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
+    //     },
+    //     Err(e) => {
+    //         error!("get_authorize_url error! {}",e);
+    //         JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+    //     },
+    // }
 }
