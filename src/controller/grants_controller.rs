@@ -22,9 +22,8 @@ pub async fn grants_query(params: Json<PageParams>,rb: &State<Arc<Rbatis>>) -> J
             JSONResponse::ok(json!(re))
         },
         Err(e) => {
-            let msg = "query Fail!";
             error!("grants/query return err, {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": "query Fail!" }))
         },
     }
 }
@@ -40,75 +39,75 @@ pub async fn grants_add(_auth: Token, grants: Json<Grants>,rb: &State<Arc<Rbatis
             if s.trim().len() == 0 {
                 let msg = "missing userid!";
                 error!("grants/add return err, {}",msg);
-                return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(1,json!({"msg": msg }))
             }
 
             if !_auth.sub.starts_with(s){
                 let msg = "token Error!";
                 error!("grants/add return err, {}",msg);
-                return JSONResponse::err(99,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(99,json!({"msg": msg }))
             }
         },
         None => {
             let msg = "missing userid!";
             error!("grants/add return err, {}",msg);
-            return JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
+            return JSONResponse::err(2,json!({"msg": msg }))
         },
     }
 
     if util::is_empty(&grants.title){
         let msg = "missing title!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(3,json!({"msg": msg }))
     }
 
     if util::is_empty(&grants.user_name){
         let msg = "missing user_name!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(4,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(4,json!({"msg": msg }))
     }
 
     if util::is_empty(&grants.description){
         let msg = "missing description!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(5,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(5,json!({"msg": msg }))
     }
 
     if util::is_empty(&grants.logo){
         let msg = "missing logo!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
 
     if util::is_empty(&grants.contract_address){
         let msg = "missing contract_address!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
     if util::is_empty(&grants.website){
         let msg = "missing website!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
     if util::is_empty(&grants.twitter){
         let msg = "missing twitter!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
     if util::is_empty(&grants.bringing){
         let msg = "missing bringing!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
     if util::is_empty(&grants.external_funding){
         let msg = "missing external_funding!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
     if util::is_empty(&grants.based){
         let msg = "missing based!";
         error!("grants/add return err, {}",msg);
-        return JSONResponse::err(9,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(9,json!({"msg": msg }))
     }
 
 
@@ -122,7 +121,7 @@ pub async fn grants_add(_auth: Token, grants: Json<Grants>,rb: &State<Arc<Rbatis
         },
         Err(e) => {
             error!("grants/add return err, {}",e);
-            JSONResponse::err(10,json!({"msg": format!("{}", e) }))
+            JSONResponse::err(10,json!({"msg": "add grants error!" }))
         },
     }
 }

@@ -6,7 +6,7 @@ use rocket_json_response::JSONResponse;
 use serde::{Serialize, Deserialize};
 use serde_json::{Value, json};
 
-use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN, MAIN_URL}, model::{common_model::Token, twitter_model::UserTwitter}, service::twitter_service};
+use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN, MAIN_URL}, model::{common_model::Token, twitter_model::UserTwitter}, service::twitter_service, utils::util};
 
 #[derive(FromForm,Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -93,6 +93,11 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
                             }
                         }
                     }
+
+                    if util::is_empty(&access_token) || util::is_empty(&access_token_secret) || util::is_empty(&twitter_user_id) || util::is_empty(&screen_name){
+                        return JSONResponse::err(4,json!({"msg": format!("{}", t)}))
+                    }
+
                     let user_twitter = UserTwitter {
                         user_id:user_id.to_string(),
                         twitter_user_id,
@@ -104,11 +109,14 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
                     match twitter_service::add_twitter(rb,user_twitter).await {
                         Ok(ut) => {
                             info!("step 3 access_token success,{:?}",ut.screen_name);
-                            JSONResponse::ok(json!({"twitter_name": format!("{:?}", ut.screen_name)}))
+                            match ut.screen_name {
+                            Some(s) => JSONResponse::ok(json!({"twitter_name": s})),
+                            None => {JSONResponse::err(4,json!({"msg": "twitter data missing"}))},
+                        }
                         },
                         Err(e) => {
                             error!("access_token error,{}",e);
-                            JSONResponse::err(3,json!({"msg": format!("{}", e)}))
+                            JSONResponse::err(3,json!({"msg": e}))
                         },
                     }
 
@@ -116,13 +124,13 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
                 },
                 Err(e) => {
                     error!("access_token error,{}",e);
-                    JSONResponse::err(2,json!({"msg": format!("{}", e)}))
+                    JSONResponse::err(2,json!({"msg": e.to_string()}))
                 },
             }
         },
         Err(e) => {
             error!("access_token error,{}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            JSONResponse::err(1,json!({"msg": e.to_string()}))
         }
     }
 }

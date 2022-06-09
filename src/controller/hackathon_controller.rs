@@ -19,9 +19,8 @@ pub async fn hackathon_count(rb: &State<Arc<Rbatis>>) -> JSONResponse<'static, V
             JSONResponse::ok(json!(re))
         },
         Err(e) => {
-            let msg = "query Fail!";
             error!("hackathon/count return err, {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": "hackathon count error!" }))
         },
     }
 }
@@ -38,9 +37,8 @@ pub async fn hackathon_query(params: Json<PageParams>,rb: &State<Arc<Rbatis>>) -
             JSONResponse::ok(json!(re))
         },
         Err(e) => {
-            let msg = "query Fail!";
             error!("hackathon/query return err, {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": "hackathon query error!" }))
         },
     }
 }
@@ -59,9 +57,8 @@ pub async fn hackathon_query_by_user(_auth: Token,params: Json<PageParams>,rb: &
             JSONResponse::ok(json!(re))
         },
         Err(e) => {
-            let msg = "query Fail!";
             error!("hackathon/query return err, {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": "hackathon query error!" }))
         },
     }
 }
@@ -78,19 +75,19 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
             if s.trim().len() == 0 {
                 let msg = "missing userid!";
                 error!("hackathon/join return err, {}",msg);
-                return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(1,json!({"msg": msg }))
             }
 
             if !_auth.sub.starts_with(s){
                 let msg = "token Error!";
                 error!("hackathon/join return err, {}",msg);
-                return JSONResponse::err(99,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(99,json!({"msg": msg }))
             }
         },
         None => {
             let msg = "missing userid!";
             error!("hackathon/join return err, {}",msg);
-            return JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
+            return JSONResponse::err(2,json!({"msg": msg }))
         },
     }
 
@@ -100,18 +97,18 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
                 if hackathon_id.trim().len() == 0 {
                     let msg = "missing hackathon_id!";
                     error!("hackathon/join return err, {}",msg);
-                    return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+                    return JSONResponse::err(3,json!({"msg": msg }))
                 }
                 
                 if let Err(e) = hackathon_service::hackathon_join_check(rb, hackathon_id, user_id).await{
                     error!("hackathon/join return err, {}",e);
-                    return JSONResponse::err(4,json!({"msg": format!("{}", e) }))
+                    return JSONResponse::err(4,json!({"msg": e }))
                 }
             },
             None => {
                 let msg = "missing hackathon_id!";
                 error!("hackathon/join return err, {}",msg);
-                return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(3,json!({"msg": msg }))
             },
         }
     }
@@ -120,34 +117,34 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
     if util::is_empty(&hackathon.discord){
         let msg = "missing discord!";
         error!("hackathon/join return err, {}",msg);
-        return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(3,json!({"msg": msg }))
     }
 
     if util::is_empty(&hackathon.sharing_email){
         let msg = "missing sharing_email!";
         error!("hackathon/join return err, {}",msg);
-        return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(3,json!({"msg": msg }))
     }
 
     if let Some(s) = &hackathon.sharing_email{
         if !s.eq("0") && !s.eq("1"){
             let msg = "sharing_email error!";
             error!("hackathon/join return err, {}",msg);
-            return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+            return JSONResponse::err(3,json!({"msg": msg }))
         }
     }
 
     if util::is_empty(&hackathon.agree){
         let msg = "missing agree!";
         error!("hackathon/join return err, {}",msg);
-        return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(3,json!({"msg": msg }))
     }
 
     if let Some(s) = &hackathon.agree{
         if !s.eq("0") && !s.eq("1"){
             let msg = "agree error!";
             error!("hackathon/join return err, {}",msg);
-            return JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+            return JSONResponse::err(3,json!({"msg": msg }))
         }
     }
 
@@ -160,7 +157,7 @@ pub async fn hackathon_join(_auth: Token, hackathon: Json<UserHackathon>,rb: &St
         },
         Err(e) => {
             error!("hackathon/join return err, {}",e);
-            JSONResponse::err(10,json!({"msg": format!("{}", e) }))
+            JSONResponse::err(10,json!({"msg": "hackathon join error!" }))
         },
     }
 }
@@ -177,7 +174,7 @@ pub async fn hackathon_detail(hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>
             if h.trim().len() == 0 {
                 let msg = "missing hackathon_id!";
                 error!("hackathon/detail return err, {}",msg);
-                return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+                return JSONResponse::err(1,json!({"msg": msg }))
             }else{
                 match hackathon_service::query_detail(rb, &h).await {
                     Ok(re) => {
@@ -186,7 +183,7 @@ pub async fn hackathon_detail(hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>
                     },
                     Err(e) => {
                         error!("hackathon/detail return err, {}",e);
-                        JSONResponse::err(1,json!({"msg": format!("{}", e) }))
+                        JSONResponse::err(1,json!({"msg": e }))
                     },
                 }
             }
@@ -194,7 +191,7 @@ pub async fn hackathon_detail(hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>
         None => {
             let msg = "missing hackathon_id!";
             error!("hackathon/detail return err, {}",msg);
-            return JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
+            return JSONResponse::err(2,json!({"msg": msg }))
         },
     }    
 }

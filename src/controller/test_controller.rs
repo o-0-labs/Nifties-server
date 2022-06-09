@@ -20,7 +20,7 @@ pub async fn query(params: Json<ArticleQueryParams>,rb: &State<Arc<Rbatis>>) -> 
         Ok(re) => JSONResponse::ok(json!(re)),
         Err(_) => {
             let msg = "Fail!";
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": msg }))
         },
     }
 }

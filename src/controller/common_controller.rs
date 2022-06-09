@@ -75,8 +75,9 @@ pub async fn upload(_auth: Token, mut form: Form<Upload<'_>>) -> JSONResponse<'s
     let suffix = check_content_type(form.upload.content_type());
 
     if let None = suffix {
-        let msg = "Fail!";
-        JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        let msg = "suffix not matched";
+        error!("img upload error,{}",msg);
+        JSONResponse::err(1,json!({"msg": msg }))
     }else if let Some(s) = suffix {
         let mut file_name = String::from("img/");
         file_name.push_str(&Uuid::new_v4().to_string().replace("-", ""));
@@ -85,17 +86,16 @@ pub async fn upload(_auth: Token, mut form: Form<Upload<'_>>) -> JSONResponse<'s
         let save_path = Path::new(&file_name);
         match form.upload.persist_to(save_path).await{
             Ok(_) => {
-
+                info!("img upload success! {}",&file_name);
                 JSONResponse::ok(json!({"url": format!("{}{}", MAIN_URL, file_name) }))
             },
             Err(_) => {
-            let msg = "Fail!";
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+                error!("file save error! {}",&file_name);
+                JSONResponse::err(1,json!({"msg": "file save error!" }))
             },
         }
     }else{
-        let msg = "Fail!";
-        JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        JSONResponse::err(1,json!({"msg": "Fail!" }))
     }
    
 }

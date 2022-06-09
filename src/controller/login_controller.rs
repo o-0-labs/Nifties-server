@@ -28,20 +28,20 @@ pub async fn login(rb: &State<Arc<Rbatis>>, user_auth: Json<UserAuth>) -> JSONRe
                 Err(_) => {
                     let msg = "get token Fail!";
                     error!("login return err, {}",msg);
-                    JSONResponse::err(3,json!({"msg": format!("{}", msg) }))
+                    JSONResponse::err(3,json!({"msg": msg }))
                 },
             },
             Err(_) => {
                 let msg = "check user Fail!";
                 error!("login return err, {}",msg);
-                JSONResponse::err(2,json!({"msg": format!("{}", msg) }))
+                JSONResponse::err(2,json!({"msg": msg }))
             },
         }
 
     } else {
         let msg = "verify Fail!";
         error!("login return err, {}",msg);
-        JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        JSONResponse::err(1,json!({"msg": msg }))
     }
 }
 
@@ -57,19 +57,19 @@ pub async fn register(_auth: Token, user: Json<User>, rb: &State<Arc<Rbatis>>) -
     if !sub.eq(&_auth.sub){
         let msg = "token Error!";
         error!("register return err, {}",msg);
-        return JSONResponse::err(99,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(99,json!({"msg": msg }))
     }
 
     if util::is_empty(&u.user_name){
         let msg = "missing username!";
         error!("register return err, {}",msg);
-        return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(1,json!({"msg": msg }))
     }
 
     if util::is_empty(&u.email){
         let msg = "missing email!";
         error!("register return err, {}",msg);
-        return JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+        return JSONResponse::err(1,json!({"msg": msg }))
     }
 
     if util::is_empty(&u.profile_photo){
@@ -83,9 +83,9 @@ pub async fn register(_auth: Token, user: Json<User>, rb: &State<Arc<Rbatis>>) -
             JSONResponse::ok(json!(u))
         },
         Err(_) => {
-            let msg = "update Fail!";
+            let msg = "user update error!";
             error!("register return err, {}",msg);
-            JSONResponse::err(1,json!({"msg": format!("{}", msg) }))
+            JSONResponse::err(1,json!({"msg": msg }))
         },
     }
 
