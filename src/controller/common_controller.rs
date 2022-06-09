@@ -45,6 +45,12 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
     "#)
 }
 
+#[options("/")]
+pub async fn options() -> String {
+    "is this ok?".to_string()
+}
+
+
 #[get("/error")]
 pub async fn error() -> String {
 //     ApiResponse::custom_error(MESSAGE_4000.to_string(),4000)
