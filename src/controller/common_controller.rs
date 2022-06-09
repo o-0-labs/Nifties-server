@@ -45,9 +45,9 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
     "#)
 }
 
-#[options("/")]
-pub async fn options() -> String {
-    "is this ok?".to_string()
+#[options("/<s>")]
+pub async fn options(s : String) -> String {
+    format!("is this ok? {}",s)
 }
 
 
