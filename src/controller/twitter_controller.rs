@@ -110,9 +110,9 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
                         Ok(ut) => {
                             info!("step 3 access_token success,{:?}",ut.screen_name);
                             match ut.screen_name {
-                            Some(s) => JSONResponse::ok(json!({"twitter_name": s})),
-                            None => {JSONResponse::err(4,json!({"msg": "twitter data missing"}))},
-                        }
+                                Some(s) => JSONResponse::ok(json!({"twitter_name": s})),
+                                None => {JSONResponse::err(4,json!({"msg": "twitter data missing"}))},
+                            }
                         },
                         Err(e) => {
                             error!("access_token error,{}",e);
@@ -143,13 +143,12 @@ pub async fn remove_twitter(rb: &State<Arc<Rbatis>>, _auth: Token) -> JSONRespon
 
     match twitter_service::remove_twitter(rb, user_id).await {
         Ok(_) => {
-            let msg = "success!";
             info!("remove_twitter success!");
-            JSONResponse::ok(json!({"msg": format!("{}", msg)}))
+            JSONResponse::ok(json!({"msg": "remove_twitter success!"}))
         },
         Err(e) => {
             error!("remove_twitter error,{}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            JSONResponse::err(1,json!({"msg": "remove twitter error!"}))
         },
     }
 }
@@ -164,17 +163,21 @@ pub async fn check_twitter(rb: &State<Arc<Rbatis>>, _auth: Token) -> JSONRespons
             match r {
                 Some(ut) => {
                     info!("check_twitter success, true");
-                    JSONResponse::ok(json!({"twitter_flag": true, "twitter_name": format!("{:?}", ut.screen_name)}))
+                    match ut.screen_name {
+                        Some(s) => JSONResponse::ok(json!({"twitter_flag": true, "twitter_name": s })),
+                        None => {JSONResponse::err(2,json!({"msg": "twitter data missing"}))},
+                    }
+                    
                 },
                 None => {
                     info!("check_twitter success, falsse");
-                    JSONResponse::ok(json!({"twitter_flag": format!("{}", false)}))
+                    JSONResponse::ok(json!({"twitter_flag": false}))
                 },
             }
         },
         Err(e) => {
             error!("remove_twitter error,{}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            JSONResponse::err(1,json!({"msg": e}))
         },
     }
 }
