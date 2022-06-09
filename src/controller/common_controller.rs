@@ -1,4 +1,4 @@
-use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::{Header, ContentType}, fs::{NamedFile, TempFile}, response::content, form::Form};
+use rocket::{fairing::{Fairing, Info, Kind}, Request, Response, http::{Header, ContentType, Method, Status}, fs::{NamedFile, TempFile}, response::content, form::Form};
 use serde_json::{json, Value};
 use std::path::{PathBuf, Path};
 use uuid::Uuid;
@@ -26,6 +26,16 @@ impl Fairing for CORS {
         response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
         response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
         response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+
+        //解决联调时跨域 preflight
+        match _request.method() {
+            Method::Options =>{
+                response.set_status(Status::Ok);
+            },
+            _ => {},
+        }
+        
+
     }
 }
 
@@ -43,16 +53,6 @@ pub fn general_not_found() -> content::RawHtml<&'static str> {
         <p>Hmm... What are you looking for?</p>
         Say <a href="/Niftes/index">hello!</a>
     "#)
-}
-
-#[options("/<s>")]
-pub async fn options(s : String) -> String {
-    format!("is this ok? {}",s)
-}
-
-#[options("/<s>/<s2>")]
-pub async fn options2(s : String,s2 : String) -> String {
-    format!("is this ok? {}/{}",s,s2)
 }
 
 
