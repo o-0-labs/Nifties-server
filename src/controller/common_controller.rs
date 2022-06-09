@@ -50,6 +50,11 @@ pub async fn options(s : String) -> String {
     format!("is this ok? {}",s)
 }
 
+#[options("/<s>/<s2>")]
+pub async fn options2(s : String,s2 : String) -> String {
+    format!("is this ok? {}/{}",s,s2)
+}
+
 
 #[get("/error")]
 pub async fn error() -> String {
