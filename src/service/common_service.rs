@@ -40,12 +40,12 @@ pub async fn check_user(rb: &State<Arc<Rbatis>>, call_name: String) -> Result<Us
 }
 
 #[py_sql("select * from user where delete_flag = '0' and call_name= #{call_name} ")]
-pub async fn query_user(rb: &State<Arc<Rbatis>>, call_name: &str) -> Option<User> {
+async fn query_user(rb: &State<Arc<Rbatis>>, call_name: &str) -> Option<User> {
     todo!()
 }
 
 #[py_sql("insert into user (user_id,call_name,create_time) values (#{user.user_id},#{user.call_name},#{user.create_time}) ")]
-pub async fn add_user(rb: &State<Arc<Rbatis>>, user: &User) -> Result<(), Error> {
+async fn add_user(rb: &State<Arc<Rbatis>>, user: &User) -> Result<(), Error> {
     todo!()
 }
 
@@ -80,7 +80,7 @@ pub async fn register(rb: &State<Arc<Rbatis>>, user: User) -> Result<User, Error
 }
 
 #[py_sql("update user set user_name = #{user.user_name}, email = #{user.email}, profile_photo = #{user.profile_photo} where user_id = #{user.user_id} ")]
-pub async fn update_user(rb: &State<Arc<Rbatis>>,user: &User) -> Result<(),Error>{ }
+async fn update_user(rb: &State<Arc<Rbatis>>,user: &User) -> Result<(),Error>{ }
 
 
 pub fn verify(user: &UserAuth) -> bool{

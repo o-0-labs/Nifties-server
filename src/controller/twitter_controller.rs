@@ -3,17 +3,9 @@ use std::sync::Arc;
 use rbatis::rbatis::Rbatis;
 use rocket::{response::{content, Redirect}, serde::json::Json, State};
 use rocket_json_response::JSONResponse;
-use serde::{Serialize, Deserialize};
 use serde_json::{Value, json};
 
-use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, ACCESS_TOKEN, MAIN_URL}, model::{common_model::Token, twitter_model::UserTwitter}, service::twitter_service, utils::util};
-
-#[derive(FromForm,Serialize, Deserialize, Clone, Debug)]
-#[serde(crate = "rocket::serde")]
-pub struct Oauth {
-    oauth_token: String,
-    oauth_verifier: String,
-}
+use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, MAIN_URL}, model::{common_model::Token, twitter_model::{Oauth, UserTwitter, Tweets, TimelineParams}}, service::twitter_service, utils::util};
 
 
 #[get("/gettoken?<oauth_token>&<oauth_verifier>")]
@@ -29,7 +21,7 @@ pub async fn get_authorize_url(_auth: Token) -> Redirect{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
-    match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await{
+    match egg_mode::auth::request_token(&con_token, OAUTH_CALLBACK).await {
         Ok(t) =>{
             info!("step 1 request_token, oauth_token: {:?}",t);
             let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
@@ -52,14 +44,8 @@ pub async fn get_access_token(rb: &State<Arc<Rbatis>>, _auth: Token,oauth: Json<
     let user_id = &_auth.sub[0..32];
 
     let oauth = oauth.into_inner();
-    let params = [("oauth_token",&oauth.oauth_token),("oauth_verifier",&oauth.oauth_verifier)];
 
-    let client = reqwest::Client::new();
-
-    let res = client.post(ACCESS_TOKEN)
-    .form(&params)
-    .send()
-    .await;
+    let res = twitter_service::access(oauth).await;
 
     match res {
         Ok(r) => {
@@ -177,6 +163,51 @@ pub async fn check_twitter(rb: &State<Arc<Rbatis>>, _auth: Token) -> JSONRespons
         },
         Err(e) => {
             error!("remove_twitter error,{}",e);
+            JSONResponse::err(1,json!({"msg": e}))
+        },
+    }
+}
+
+#[post("/tweets", format = "json", data = "<tweets>")]
+pub async fn tweets(rb: &State<Arc<Rbatis>>, _auth: Token, tweets : Json<Tweets>) -> JSONResponse<'static, Value>{
+
+    let user_id = &_auth.sub[0..32];
+
+    let tweets = tweets.into_inner();
+
+    if util::is_empty(&tweets.text) {
+        error!("tweets error, missing text");
+        return JSONResponse::err(1,json!({"msg": "missing text"}));
+    }
+
+    match twitter_service::tweets(rb,tweets,user_id).await {
+        Ok(id) => {
+            match id {
+                Value::Null => JSONResponse::err(-1,json!({"msg": "There is no return tweet id, please confirm whether it is successful."})),
+                _ => JSONResponse::ok(json!({"id": id})),
+            }
+            
+        },
+        Err(e) => JSONResponse::err(2,json!({"msg": e})),
+    }
+}
+
+#[post("/timeline", format = "json", data = "<timeline>")]
+pub async fn get_timeline(rb: &State<Arc<Rbatis>>, _auth: Token, timeline: Json<TimelineParams>) -> JSONResponse<'static, Value>{
+
+    let user_id = &_auth.sub[0..32];
+    let timeline = timeline.into_inner();
+
+    let res = twitter_service::get_timeline(rb, user_id, timeline).await;
+
+    match res {
+        Ok(json) => {
+            match json {
+                Value::Null => JSONResponse::err(-1,json!({"msg": "There is no return data, please confirm whether it is successful."})),
+                _ => JSONResponse::ok(json),
+            }
+        },
+        Err(e) => {
             JSONResponse::err(1,json!({"msg": e}))
         },
     }
