@@ -145,7 +145,7 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
 
         let mut params = ParamList::new();
 
-        params = params.add_param("max_result", timeline.max_result.to_string());
+        params = params.add_param("max_results", timeline.max_results.to_string());
         
         if let Some(s) = timeline.start_time {
             params = params.add_param("start_time", s);
@@ -189,7 +189,7 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
      
         let req = raw::request_get(&timeline_url, &access_token, Some(&params));
 
-        info!("the request is : {:?}",req);
+        //info!("the request is : {:?}",req);
 
         let res: Result<egg_mode::Response<serde_json::Value>, egg_mode::error::Error> = raw::response_json(req).await;
 

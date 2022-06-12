@@ -35,7 +35,7 @@ pub struct Tweets{
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TimelineParams{
-    pub max_result:u64,
+    pub max_results:u64,
     pub start_time:Option<String>,
     pub end_time:Option<String>,
     pub since_id:Option<String>,
