@@ -141,6 +141,8 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
 
         let timeline_url = TIMELINE.replace("twitter_user_id", &at.twitter_user_id);
 
+        info!("the timeline_url is : {}",timeline_url);
+
         let mut params = ParamList::new();
 
         params = params.add_param("max_result", timeline.max_result.to_string());
@@ -186,6 +188,8 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
         }
      
         let req = raw::request_get(&timeline_url, &access_token, Some(&params));
+
+        info!("the request is : {:?}",req);
 
         let res: Result<egg_mode::Response<serde_json::Value>, egg_mode::error::Error> = raw::response_json(req).await;
 
