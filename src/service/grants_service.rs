@@ -11,8 +11,8 @@ pub async fn grants_query(rb: &State<Arc<Rbatis>>, params: PageParams) -> Result
     query_grants(rb,page_req,&params).await
 }
 
-pub async fn grants_add(rb: &State<Arc<Rbatis>>, grants: Grants) -> Result<(),Error>{
-    insert_grants(rb,&grants).await
+pub async fn grants_add(rb: &State<Arc<Rbatis>>, grants: &Grants) -> Result<(),Error>{
+    insert_grants(rb,grants).await
 }
 
 #[py_sql("select * from grants where delete_flag='0'

@@ -114,7 +114,7 @@ pub async fn event_add(_auth: Token, event: Json<Event>,rb: &State<Arc<Rbatis>>)
     match event_service::event_add(rb,&event).await {
         Ok(_) => {
             info!("event/add return ok");
-            JSONResponse::ok(json!({"msg": "success" }))
+            JSONResponse::ok(json!({"msg": "success","event_address":event.event_address }))
         },
         Err(e) => {
             error!("event/add return err, {}",e);
