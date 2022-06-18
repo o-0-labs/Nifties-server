@@ -20,3 +20,10 @@ pub struct Grants {
     pub create_time:Option<rbatis::DateTimeNative>,
 
 }
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct GrantsAddress{
+    pub contract_address: String,
+    pub grants_id: Option<String>,
+}

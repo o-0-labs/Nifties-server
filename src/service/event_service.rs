@@ -3,7 +3,7 @@ use std::sync::Arc;
 use rbatis::{rbatis::Rbatis, Error, py_sql, rb_py, push_index, PageRequest, Page};
 use rocket::State;
 
-use crate::model::{common_model::PageParams, event_model::Event};
+use crate::model::{common_model::PageParams, event_model::{Event, EventAddress}};
 
 
 
@@ -46,3 +46,25 @@ async fn event_view_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),E
 
 #[py_sql("update event a set a.like = a.like + 1 where a.event_id = #{event.event_id} ")]
 async fn event_like_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),Error>{  todo!() }
+
+pub async fn get_event_contract(rb: &State<Arc<Rbatis>>) -> Option<String>{
+    match get_contract(rb).await{
+        Ok(r) => {
+            match r{
+                Some(s) => {
+                    Some(s.event_address)
+                },
+                None => None,
+            }
+        },
+        Err(e) => {
+            error!("get_event_contract error! {}",e);
+            None
+        },
+    }
+}
+
+#[py_sql("select * from event_address where event_id is null limit 1 ")]
+async fn get_contract(rb: &State<Arc<Rbatis>>) -> Option<EventAddress>{
+    todo!()
+}

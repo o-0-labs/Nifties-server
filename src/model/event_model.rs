@@ -16,3 +16,11 @@ pub struct Event{
     pub status: Option<String>,
     pub create_time: Option<rbatis::DateTimeNative>,
 }
+
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct EventAddress{
+    pub event_address: String,
+    pub event_id: Option<String>,
+}

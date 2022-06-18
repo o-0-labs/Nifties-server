@@ -79,8 +79,10 @@ pub async fn grants_add(_auth: Token, grants: Json<Grants>,rb: &State<Arc<Rbatis
         return JSONResponse::err(9,json!({"msg": msg }))
     }
 
+    grants.contract_address = grants_service::get_grants_contract(rb).await;
+
     if util::is_empty(&grants.contract_address){
-        let msg = "missing contract_address!";
+        let msg = "there is no contract_address!";
         error!("grants/add return err, {}",msg);
         return JSONResponse::err(9,json!({"msg": msg }))
     }
