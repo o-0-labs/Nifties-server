@@ -167,12 +167,22 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
             params = params.add_param("pagination_token", s);
         }
 
+        if let Some(s) = timeline.expansions {
+            params = params.add_param("expansions", s);
+        }else{
+            params = params.add_param("expansions", "author_id");
+        }
+
         if let Some(s) = timeline.tweet_fields {
             params = params.add_param("tweet.fields", s);
+        }else{
+            params = params.add_param("tweet.fields", "public_metrics,created_at");
         }
 
         if let Some(s) = timeline.user_fields {
             params = params.add_param("user.fields", s);
+        }else{
+            params = params.add_param("user.fields", "profile_image_url");
         }
 
         if let Some(s) = timeline.media_fields {
@@ -186,6 +196,13 @@ pub async fn get_timeline(rb: &State<Arc<Rbatis>>, user_id: &str, timeline :Time
         if let Some(s) = timeline.poll_fields {
             params = params.add_param("poll.fields", s);
         }
+
+        if let Some(s) = timeline.exclude {
+            params = params.add_param("exclude", s);
+        }else{
+            params = params.add_param("exclude", "retweets,replies");
+        }
+
      
         let req = raw::request_get(&timeline_url, &access_token, Some(&params));
 

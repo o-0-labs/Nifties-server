@@ -47,4 +47,5 @@ pub struct TimelineParams{
     pub media_fields:Option<String>,
     pub place_fields:Option<String>,
     pub poll_fields:Option<String>,
+    pub exclude:Option<String>,
 }
