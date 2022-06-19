@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use rbatis::rbatis::Rbatis;
-use rocket::{response::{content, Redirect}, serde::json::Json, State};
+use rocket::{response::content, serde::json::Json, State};
 use rocket_json_response::JSONResponse;
 use serde_json::{Value, json};
 
-use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL, MAIN_URL}, model::{common_model::Token, twitter_model::{Oauth, UserTwitter, Tweets, TimelineParams}}, service::twitter_service, utils::util};
+use crate::{constant::{CONSUMER_KEY, CONSUMER_SECRET, OAUTH_CALLBACK, AUTHORIZE_URL}, model::{common_model::Token, twitter_model::{Oauth, UserTwitter, Tweets, TimelineParams}}, service::twitter_service, utils::util};
 
 
 #[get("/gettoken?<oauth_token>&<oauth_verifier>")]
@@ -16,8 +16,8 @@ pub async fn twitter_token(oauth_token: &str, oauth_verifier: &str) -> content::
     "#)
 }
 
-#[get("/authorize_url")]
-pub async fn get_authorize_url(_auth: Token) -> Redirect{
+#[post("/authorize_url")]
+pub async fn get_authorize_url(_auth: Token) -> JSONResponse<'static, Value>{
 
     let con_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SECRET);
 
@@ -25,14 +25,14 @@ pub async fn get_authorize_url(_auth: Token) -> Redirect{
         Ok(t) =>{
             info!("step 1 request_token, oauth_token: {:?}",t);
             let authorize_url = format!("{}?oauth_token={}",AUTHORIZE_URL,t.key);
-            //JSONResponse::ok(json!({"authorize_url": format!("{}", authorize_url)}))
-            Redirect::to(authorize_url)
+            JSONResponse::ok(json!({"authorize_url":  authorize_url}))
+            //Redirect::to(authorize_url)
         },
         Err(e) => {
             error!("get_authorize_url error! {}",e);
-            //JSONResponse::err(1,json!({"msg": format!("{}", e)}))
-            let error_url = format!("{}{}",MAIN_URL,"error");
-            Redirect::to(error_url)
+            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            //let error_url = format!("{}{}",MAIN_URL,"error");
+            //Redirect::to(error_url)
         },
     }
 }
