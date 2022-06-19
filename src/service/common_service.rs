@@ -58,7 +58,8 @@ pub async fn get_token(user: User) -> Result<User, ()> {
         &Header::default(),
         &Claims {
             sub: format!("{}&{}", user.user_id, user.call_name),
-            exp: timestamp + 1800,
+            //exp: timestamp + 1800,
+            exp: timestamp + 3600000,
         },
         &EncodingKey::from_secret(KEY),
     ) {
