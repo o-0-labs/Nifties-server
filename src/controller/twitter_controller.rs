@@ -30,7 +30,7 @@ pub async fn get_authorize_url(_auth: Token) -> JSONResponse<'static, Value>{
         },
         Err(e) => {
             error!("get_authorize_url error! {}",e);
-            JSONResponse::err(1,json!({"msg": format!("{}", e)}))
+            JSONResponse::err(1,json!({"msg": "get authorize url error!"}))
             //let error_url = format!("{}{}",MAIN_URL,"error");
             //Redirect::to(error_url)
         },
