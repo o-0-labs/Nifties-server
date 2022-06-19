@@ -95,7 +95,7 @@ if params.status != null && params.status != '':
 async fn query_hackathon_by_user(rb: &State<Arc<Rbatis>>, page_req: &PageRequest, params: &PageParams, user_id: &str) -> Page<Hackathon> { todo!() }
 
 
-#[py_sql("select * from hackathon where delete_flag='0' and status='1' and hackathon_id=#{hackathon_id} ")]
+#[py_sql("select * from hackathon where delete_flag='0' and hackathon_id=#{hackathon_id} ")]
 async fn query_hackathon_by_id(rb: &State<Arc<Rbatis>>,hackathon_id: &str) -> Option<Hackathon> { todo!() }
 
 #[py_sql("select * from user_hackathon where  hackathon_id=#{hackathon_id} and user_id=#{user_id}")]
