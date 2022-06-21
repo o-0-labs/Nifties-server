@@ -195,3 +195,34 @@ pub async fn hackathon_detail(hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>
         },
     }    
 }
+
+#[post("/hackathon/checkjoin", format = "json", data = "<hackathon>")]
+pub async fn check_join(_auth: Token,hackathon: Json<Hackathon>,rb: &State<Arc<Rbatis>>) -> JSONResponse<'static, Value> {
+    info!("hackathon/checkjoin parameter, {:?}",hackathon);
+
+    let hackathon = hackathon.into_inner();
+
+    let user_id = &_auth.sub[0..32];
+
+
+    if let Some(s) = hackathon.hackathon_id {
+        match hackathon_service::hackathon_join_check(rb,&s,user_id).await{
+            Ok(_) => {
+                JSONResponse::ok(json!({"join_flag": "1" }))
+            },
+            Err(s) => {
+                if s.eq("already joined") {
+                    JSONResponse::ok(json!({"join_flag": "0" }))
+                }else{
+                    JSONResponse::err(2,json!({"msg": s }))
+                }
+            },
+        }
+        
+    }else{
+        let msg = "missing hackathon_id!";
+        error!("hackathon/checkjoin return err, {}",msg);
+        return JSONResponse::err(1,json!({"msg": msg }))
+    }
+
+}
