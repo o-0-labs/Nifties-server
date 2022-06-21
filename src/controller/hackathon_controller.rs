@@ -208,11 +208,11 @@ pub async fn check_join(_auth: Token,hackathon: Json<Hackathon>,rb: &State<Arc<R
     if let Some(s) = hackathon.hackathon_id {
         match hackathon_service::hackathon_join_check(rb,&s,user_id).await{
             Ok(_) => {
-                JSONResponse::ok(json!({"join_flag": "1" }))
+                JSONResponse::ok(json!({"join_flag": "0" }))
             },
             Err(s) => {
                 if s.eq("already joined") {
-                    JSONResponse::ok(json!({"join_flag": "0" }))
+                    JSONResponse::ok(json!({"join_flag": "1" }))
                 }else{
                     JSONResponse::err(2,json!({"msg": s }))
                 }
