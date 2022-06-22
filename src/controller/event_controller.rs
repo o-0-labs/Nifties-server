@@ -88,7 +88,16 @@ pub async fn event_add(_auth: Token, event: Json<Event>,rb: &State<Arc<Rbatis>>)
         return JSONResponse::err(6,json!({"msg": msg }))
     }
 
-    event.event_address = event_service::get_event_contract(rb).await;
+    if util::is_empty(&event.user_name){
+        let msg = "missing user_name!";
+        error!("event/add return err, {}",msg);
+        return JSONResponse::err(8,json!({"msg": msg }))
+    }
+
+    event.create_time = Some(rbatis::DateTimeNative::now());
+
+    let event_id = Uuid::new_v4().to_string().replace("-", "");
+    event.event_address = event_service::get_event_contract(rb,&event_id).await;
 
     if util::is_empty(&event.event_address){
         let msg = "there is no more event_address!";
@@ -96,20 +105,7 @@ pub async fn event_add(_auth: Token, event: Json<Event>,rb: &State<Arc<Rbatis>>)
         return JSONResponse::err(7,json!({"msg": msg }))
     }
 
-    if util::is_empty(&event.user_name){
-        let msg = "missing user_name!";
-        error!("event/add return err, {}",msg);
-        return JSONResponse::err(8,json!({"msg": msg }))
-    }
-
-    // if util::is_empty(&event.event_address){
-    //     let msg = "missing event_address!";
-    //     error!("event/add return err, {}",msg);
-    //     return JSONResponse::err(9,json!({"msg": msg }))
-    // }
-
-    event.create_time = Some(rbatis::DateTimeNative::now());
-    event.event_id = Some(Uuid::new_v4().to_string().replace("-", ""));
+    event.event_id = Some(event_id);
 
     match event_service::event_add(rb,&event).await {
         Ok(_) => {

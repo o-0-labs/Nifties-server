@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rbatis::{rbatis::Rbatis, Error, py_sql, rb_py, push_index, PageRequest, Page};
+use rbatis::{rbatis::Rbatis, Error, py_sql, rb_py, push_index, PageRequest, Page, db::DBExecResult};
 use rocket::State;
 
 use crate::model::{common_model::PageParams, event_model::{Event, EventAddress}};
@@ -47,12 +47,26 @@ async fn event_view_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),E
 #[py_sql("update event a set a.like = a.like + 1 where a.event_id = #{event.event_id} ")]
 async fn event_like_update(rb: &State<Arc<Rbatis>>,event: &Event) -> Result<(),Error>{  todo!() }
 
-pub async fn get_event_contract(rb: &State<Arc<Rbatis>>) -> Option<String>{
+pub async fn get_event_contract(rb: &State<Arc<Rbatis>>,event_id: &str) -> Option<String>{
     match get_contract(rb).await{
         Ok(r) => {
             match r{
                 Some(s) => {
-                    Some(s.event_address)
+                    match contract_add_event_id(rb,event_id,&s.event_address).await{
+                        Ok(re) => {
+                            if re.rows_affected == 1 {
+                                Some(s.event_address)
+                            }else{
+                                error!("contract_add_event_id rows_affected:0 !");
+                                None
+                            }
+                        },
+                        Err(e) => {
+                            error!("contract_add_event_id error! {}",e);
+                            None
+                        },
+                    }
+                    
                 },
                 None => None,
             }
@@ -66,5 +80,10 @@ pub async fn get_event_contract(rb: &State<Arc<Rbatis>>) -> Option<String>{
 
 #[py_sql("select * from event_address where event_id is null limit 1 ")]
 async fn get_contract(rb: &State<Arc<Rbatis>>) -> Option<EventAddress>{
+    todo!()
+}
+
+#[py_sql("update event_address set event_id=#{event_id} where event_id is null and event_address=#{event_address} ")]
+async fn contract_add_event_id(rb: &State<Arc<Rbatis>>,event_id: &str,event_address: &str) -> Result<DBExecResult,Error>{
     todo!()
 }

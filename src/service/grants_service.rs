@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rbatis::{rbatis::Rbatis, Error, py_sql, rb_py, push_index, PageRequest, Page};
+use rbatis::{rbatis::Rbatis, Error, py_sql, rb_py, push_index, PageRequest, Page, db::DBExecResult};
 use rocket::State;
 
 use crate::model::{common_model::PageParams,grants_model::{Grants, GrantsAddress}};
@@ -31,12 +31,25 @@ values
 ")]
 async fn insert_grants(rb: &State<Arc<Rbatis>>, grants: &Grants) -> Result<(),Error>{ todo!() }
 
-pub async fn get_grants_contract(rb: &State<Arc<Rbatis>>) -> Option<String>{
+pub async fn get_grants_contract(rb: &State<Arc<Rbatis>>,grants_id: &str) -> Option<String>{
     match get_contract(rb).await{
         Ok(r) => {
             match r{
                 Some(s) => {
-                    Some(s.contract_address)
+                    match contract_add_grants_id(rb,grants_id,&s.contract_address).await{
+                        Ok(dbresult) => {
+                            if dbresult.rows_affected == 1{
+                                Some(s.contract_address)
+                            }else{
+                                error!("contract_add_grants_id rows_affected:0 !");
+                                None
+                            }
+                        },
+                        Err(e) => {
+                            error!("contract_add_grants_id error! {}",e);
+                            None
+                        },
+                    }
                 },
                 None => None,
             }
@@ -50,5 +63,10 @@ pub async fn get_grants_contract(rb: &State<Arc<Rbatis>>) -> Option<String>{
 
 #[py_sql("select * from grants_address where grants_id is null limit 1 ")]
 async fn get_contract(rb: &State<Arc<Rbatis>>) -> Option<GrantsAddress>{
+    todo!()
+}
+
+#[py_sql("update grants_address set grants_id=#{grants_id} where grants_id is null and contract_address=#{contract_address} ")]
+async fn contract_add_grants_id(rb: &State<Arc<Rbatis>>,grants_id: &str,contract_address: &str) -> Result<DBExecResult,Error>{
     todo!()
 }
